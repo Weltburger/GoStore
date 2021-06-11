@@ -13,6 +13,7 @@ type Store struct {
 	userRepository    *UserRepository
 	productRepository *ProductRepository
 	orderRepository   *OrderRepository
+	chatRepository	*ChatRepository
 }
 
 func (store *Store) UserRepository() *UserRepository {
@@ -43,6 +44,16 @@ func (store *Store) OrderRepository() *OrderRepository {
 	store.orderRepository = &OrderRepository{store: store}
 
 	return store.orderRepository
+}
+
+func (store *Store) ChatRepository() *ChatRepository {
+	if store.chatRepository != nil {
+		return store.chatRepository
+	}
+
+	store.chatRepository = &ChatRepository{store: store}
+
+	return store.chatRepository
 }
 
 /*func (store *Store) ArticleRepository() *ArticleRepository {

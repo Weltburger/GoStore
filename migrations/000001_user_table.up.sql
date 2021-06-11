@@ -33,5 +33,13 @@ CREATE TABLE "public"."orders"(
     "deleted_at" timestamp
 );
 
+CREATE TABLE "public"."chats"(
+    "uuid"	uuid PRIMARY KEY DEFAULT uuid_generate_v1mc(),
+    "data" json NOT NULL default '[]'::json,
+    "create_at" timestamp NOT NULL DEFAULT now(),
+    "updated_at" timestamp NOT NULL DEFAULT now(),
+    "deleted_at" timestamp
+);
+
 Alter TABLE "public"."orders" add constraint fk_order_uuid foreign key ("product_uuid")
     references "public"."products"(uuid) on delete restrict on update cascade;

@@ -1,8 +1,10 @@
 package chat
 
 import (
+	"GoStore/pkg/models"
 	"bytes"
 	"github.com/gorilla/websocket"
+	uuid "github.com/satori/go.uuid"
 	"log"
 	"net/http"
 	"time"
@@ -34,6 +36,8 @@ var upgrader = websocket.Upgrader{
 
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
+	uuid uuid.UUID
+
 	hub *Hub
 
 	// The websocket connection.
@@ -41,6 +45,12 @@ type Client struct {
 
 	// Buffered channel of outbound messages.
 	send chan []byte
+
+	userType string
+}
+
+func (c *Client) GetUUID() uuid.UUID {
+	return c.uuid
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -66,6 +76,23 @@ func (c *Client) ReadPump() {
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 		c.hub.broadcast <- message
+
+		///////////////////////////////////
+		c.hub.history = append(c.hub.history, models.Message{
+			User: c.userType,
+			Text: string(message),
+			Time: time.Now(),
+		})
+		/*data := Message{
+			UUID: c.GetUUID(),
+			Message: message,
+		}
+
+		file, _ := json.MarshalIndent(data, "", " ")
+		if _, err := c.hub.f.WriteString(string(file)); err != nil {
+			log.Println(err)
+		}*/
+		///////////////////////////////////
 	}
 }
 
@@ -116,13 +143,13 @@ func (c *Client) WritePump() {
 }
 
 // serveWs handles websocket requests from the peer.
-func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
+func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request, user string) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+	client := &Client{uuid: uuid.NewV1(), hub: hub, conn: conn, send: make(chan []byte, 256), userType: user}
 	client.hub.register <- client
 
 	// Allow collection of memory referenced by the caller by doing all work in

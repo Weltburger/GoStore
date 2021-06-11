@@ -1,0 +1,9 @@
+{
+  "addr": ":8080",
+  "db_connection": "postgres://postgres:1234@localhost:5432/GoStore?sslmode=disable",
+  "jwt_key": "2D4B6150645367566B59703273357638792F423F4528482B4D6251655468576D5A7134743677397A24432646294A404E635266556A586E327235753878214125",
+  "redis_config": {
+    "addr": "localhost:6379",
+    "db": 0
+  }
+}
